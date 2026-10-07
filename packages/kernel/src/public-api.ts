@@ -1,5 +1,8 @@
 export * from './manifest';
 export * from './value-types';
+export * from './extension-points';
+export * from './client-config';
 export * from './ports/event-bus.port';
 export * from './ports/capability-registry.port';
+export * from './ports/ui-registry.port';
 export { InMemoryCapabilityRegistry, type ProviderSelection } from './capability-registry';

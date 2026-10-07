@@ -1,0 +1,9 @@
+{
+  "name": "@platform/tools",
+  "version": "0.1.0",
+  "private": true,
+  "generators": "./generators.json",
+  "dependencies": {
+    "@nx/devkit": "23.2.1"
+  }
+}

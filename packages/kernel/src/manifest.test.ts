@@ -10,13 +10,22 @@ describe('defineModule', () => {
     expect(m.ui.menu).toEqual([]);
   });
   it('rejects a required capability without a fallback', () => {
-    expect(() => defineModule({ ...base, requires: [{ capability: 'stock.checkLevel', version: 1 }] })).toThrow(/fallback/);
+    expect(() =>
+      defineModule({ ...base, requires: [{ capability: 'stock.checkLevel', version: 1 }] }),
+    ).toThrow(/fallback/);
   });
   it('accepts an optional capability without a fallback', () => {
-    expect(() => defineModule({ ...base, requires: [{ capability: 'stock.checkLevel', version: 1, optional: true }] })).not.toThrow();
+    expect(() =>
+      defineModule({
+        ...base,
+        requires: [{ capability: 'stock.checkLevel', version: 1, optional: true }],
+      }),
+    ).not.toThrow();
   });
-  it('rejects publishing another module\'s event', () => {
-    expect(() => defineModule({ ...base, publishes: [{ event: 'other.thing-happened', version: 1 }] })).toThrow(/own events/);
+  it("rejects publishing another module's event", () => {
+    expect(() =>
+      defineModule({ ...base, publishes: [{ event: 'other.thing-happened', version: 1 }] }),
+    ).toThrow(/own events/);
   });
   it('rejects permissions not prefixed with the module name', () => {
     expect(() => defineModule({ ...base, permissions: ['approve'] })).toThrow(/must start with/);

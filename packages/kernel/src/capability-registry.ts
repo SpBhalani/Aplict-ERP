@@ -15,9 +15,16 @@ export class InMemoryCapabilityRegistry implements CapabilityRegistry {
     }
     for (const [k, list] of byKey) {
       const wanted = selection[k];
-      const pick = wanted ? list.find((p) => p.providerName === wanted) : list.length === 1 ? list[0] : undefined;
+      const pick = wanted
+        ? list.find((p) => p.providerName === wanted)
+        : list.length === 1
+          ? list[0]
+          : undefined;
       if (wanted && !pick) throw new Error(`Provider "${wanted}" selected for ${k} does not exist`);
-      if (!pick) throw new Error(`${k} has ${list.length} providers; choose one in the client's capabilities.yaml`);
+      if (!pick)
+        throw new Error(
+          `${k} has ${list.length} providers; choose one in the client's capabilities.yaml`,
+        );
       this.chosen.set(contractKey(pick.contract), pick);
     }
   }
@@ -28,7 +35,10 @@ export class InMemoryCapabilityRegistry implements CapabilityRegistry {
 
   get<C extends CapabilityContract>(contract: C): CapabilityHandler<C> {
     const p = this.chosen.get(contractKey(contract));
-    if (!p) throw new Error(`No provider for ${contractKey(contract)}. Every required capability needs a provider or fallback.`);
+    if (!p)
+      throw new Error(
+        `No provider for ${contractKey(contract)}. Every required capability needs a provider or fallback.`,
+      );
     return p.handle as unknown as CapabilityHandler<C>;
   }
 }

@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/schema",
+  "$id": "PlatformModule",
+  "title": "Create a module",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Module name, kebab-case (e.g. quotes)",
+      "$default": { "$source": "argv", "index": 0 },
+      "x-prompt": "Module name (kebab-case)?"
+    },
+    "description": {
+      "type": "string",
+      "description": "One sentence: what the module does",
+      "default": "TODO: describe this module"
+    }
+  },
+  "required": ["name"]
+}

@@ -3,9 +3,11 @@
   "private": true,
   "type": "module",
   "packageManager": "pnpm@9.15.9",
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
-    "verify:quick": "nx affected -t lint typecheck test --base=${NX_BASE:-main} --output-style=static --parallel=3 && pnpm -s arch:check",
+    "verify:quick": "tsx tools/arch-checks/src/verify.ts",
     "verify:full": "nx run-many -t lint typecheck test --output-style=static && pnpm -s arch:check && pnpm -s contracts:check && pnpm -s tests:verify-lock",
     "arch:check": "tsx tools/arch-checks/src/run.ts",
     "contracts:check": "tsx tools/arch-checks/src/contracts.ts check",
@@ -24,6 +26,8 @@
     "@nx/devkit": "23.2.1",
     "@nx/eslint-plugin": "23.2.1",
     "@nx/js": "23.2.1",
+    "@swc-node/register": "^1.12.1",
+    "@swc/core": "^1.16.13",
     "@types/node": "^22.10.0",
     "@typescript-eslint/parser": "^8.71.1",
     "@vitest/eslint-plugin": "^1.6.27",
@@ -36,7 +40,8 @@
     "tsx": "^4.23.15",
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.71.1",
-    "vitest": "^5.0.3"
+    "vitest": "^5.0.3",
+    "@platform/tools": "workspace:*"
   },
   "dependencies": {
     "zod": "^4.6.5"

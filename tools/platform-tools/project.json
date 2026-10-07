@@ -1,0 +1,12 @@
+{
+  "name": "platform-tools",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "tools/platform-tools/src",
+  "projectType": "library",
+  "tags": ["type:tool"],
+  "targets": {
+    "lint": { "command": "eslint tools/platform-tools" },
+    "typecheck": { "command": "tsc -p tools/platform-tools/tsconfig.json" },
+    "test": { "command": "vitest run --root tools/platform-tools" }
+  }
+}

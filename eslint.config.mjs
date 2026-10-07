@@ -7,7 +7,10 @@ const publicApiOnly = {
   group: ['@platform/*/src/*', '@platform/*/src/**', '../../*/src/*'],
   message: 'Import another package only through its public API.',
 };
-const noQueue = { group: ['bullmq', 'bullmq/*'], message: 'Publish events through the kernel EventBus.' };
+const noQueue = {
+  group: ['bullmq', 'bullmq/*'],
+  message: 'Publish events through the kernel EventBus.',
+};
 const noFrameworks = {
   group: ['@nestjs/*', 'drizzle-orm', 'drizzle-orm/*', 'pg', 'bullmq', 'ioredis', 'fastify'],
   message: 'domain/ and application/ talk to ports only, never to frameworks or the database.',
@@ -27,10 +30,22 @@ export default [
           allow: [],
           depConstraints: [
             { sourceTag: 'type:contracts', onlyDependOnLibsWithTags: ['type:contracts'] },
-            { sourceTag: 'type:kernel', onlyDependOnLibsWithTags: ['type:contracts', 'type:kernel'] },
-            { sourceTag: 'type:module', onlyDependOnLibsWithTags: ['type:contracts', 'type:kernel'] },
-            { sourceTag: 'type:client', onlyDependOnLibsWithTags: ['type:contracts', 'type:kernel'] },
-            { sourceTag: 'type:tool', onlyDependOnLibsWithTags: ['type:contracts', 'type:kernel', 'type:tool'] },
+            {
+              sourceTag: 'type:kernel',
+              onlyDependOnLibsWithTags: ['type:contracts', 'type:kernel'],
+            },
+            {
+              sourceTag: 'type:module',
+              onlyDependOnLibsWithTags: ['type:contracts', 'type:kernel'],
+            },
+            {
+              sourceTag: 'type:client',
+              onlyDependOnLibsWithTags: ['type:contracts', 'type:kernel'],
+            },
+            {
+              sourceTag: 'type:tool',
+              onlyDependOnLibsWithTags: ['type:contracts', 'type:kernel', 'type:tool'],
+            },
             { sourceTag: 'type:app', onlyDependOnLibsWithTags: ['*'] },
           ],
         },
@@ -55,7 +70,7 @@ export default [
       'vitest/no-focused-tests': 'error',
       'vitest/no-disabled-tests': 'error',
       'vitest/expect-expect': 'error',
-      'vitest/valid-expect': 'error',
+      'vitest/valid-expect': ['error', { maxArgs: 2 }],
     },
   },
   {

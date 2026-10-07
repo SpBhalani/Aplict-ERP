@@ -17,7 +17,12 @@ export interface PublishContext {
  * Modules never import the queue library directly.
  */
 export interface EventBus {
-  publish<E extends EventContract>(tx: TransactionHandle, event: E, data: EventPayload<E>, ctx: PublishContext): Promise<void>;
+  publish<E extends EventContract>(
+    tx: TransactionHandle,
+    event: E,
+    data: EventPayload<E>,
+    ctx: PublishContext,
+  ): Promise<void>;
 }
 
 export const EVENT_BUS = Symbol('EVENT_BUS');

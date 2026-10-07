@@ -1,0 +1,2 @@
+// Domain: entities and business rules. Plain TypeScript only; imports nothing outside domain/.
+export {};

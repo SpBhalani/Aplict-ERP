@@ -1,0 +1,16 @@
+{
+  "name": "@platform/module-<%= name %>",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/public-api.ts",
+    "./manifest": "./manifest.ts",
+    "./ui": "./ui/register.ts"
+  },
+  "dependencies": {
+    "@platform/contracts": "workspace:*",
+    "@platform/kernel": "workspace:*",
+    "zod": "^4.6.5"
+  }
+}

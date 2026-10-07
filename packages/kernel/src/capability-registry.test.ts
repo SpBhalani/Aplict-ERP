@@ -4,11 +4,24 @@ import { defineCapability } from '@platform/contracts';
 import { InMemoryCapabilityRegistry } from './capability-registry';
 
 const stock = defineCapability({
-  name: 'stock.checkLevel', version: 1, description: 'stock level',
-  input: z.object({ itemId: z.string() }), output: z.object({ available: z.number() }),
+  name: 'stock.checkLevel',
+  version: 1,
+  description: 'stock level',
+  input: z.object({ itemId: z.string() }),
+  output: z.object({ available: z.number() }),
 });
-const own = { contract: stock, kind: 'module' as const, providerName: 'own-module', handle: async () => ({ available: 5 }) };
-const fallback = { contract: stock, kind: 'fallback' as const, providerName: 'fallback', handle: async () => ({ available: 0 }) };
+const own = {
+  contract: stock,
+  kind: 'module' as const,
+  providerName: 'own-module',
+  handle: async () => ({ available: 5 }),
+};
+const fallback = {
+  contract: stock,
+  kind: 'fallback' as const,
+  providerName: 'fallback',
+  handle: async () => ({ available: 0 }),
+};
 
 describe('InMemoryCapabilityRegistry', () => {
   it('uses the only provider when there is one', async () => {
@@ -16,7 +29,9 @@ describe('InMemoryCapabilityRegistry', () => {
     expect(await r.get(stock)({ itemId: 'a' })).toEqual({ available: 5 });
   });
   it('uses the selected provider when there are several', async () => {
-    const r = new InMemoryCapabilityRegistry([own, fallback], { 'stock.checkLevel@v1': 'fallback' });
+    const r = new InMemoryCapabilityRegistry([own, fallback], {
+      'stock.checkLevel@v1': 'fallback',
+    });
     expect(await r.get(stock)({ itemId: 'a' })).toEqual({ available: 0 });
   });
   it('refuses to start when several providers exist and none is selected', () => {

@@ -1,0 +1,11 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { describe, expect, it } from 'vitest';
+import { clientConfigSchema } from '@platform/kernel';
+
+describe('<%= name %> client.json', () => {
+  it('is a valid client configuration', () => {
+    const raw = JSON.parse(readFileSync(join(__dirname, '..', 'client.json'), 'utf8'));
+    expect(clientConfigSchema.safeParse(raw).success).toBe(true);
+  });
+});

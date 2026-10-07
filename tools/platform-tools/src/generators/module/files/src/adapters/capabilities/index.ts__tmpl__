@@ -1,0 +1,2 @@
+// Adapters (capabilities): real implementations of this module's ports.
+export {};

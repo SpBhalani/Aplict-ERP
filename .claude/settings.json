@@ -1,0 +1,130 @@
+{
+  "permissions": {
+    "disableBypassPermissionsMode": "disable",
+    "allow": [
+      "Bash(pnpm nx *)",
+      "Bash(pnpm verify:quick)",
+      "Bash(pnpm -s verify:quick)",
+      "Bash(pnpm arch:check)",
+      "Bash(pnpm -s arch:check)",
+      "Bash(pnpm contracts:check)",
+      "Bash(pnpm tests:verify-lock)",
+      "Bash(pnpm module-map)",
+      "Bash(pnpm hooks:test)",
+      "Bash(pnpm install)",
+      "Bash(pnpm exec eslint *)",
+      "Bash(pnpm exec vitest *)",
+      "Bash(git status *)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(git show *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git switch *)",
+      "Bash(git branch *)"
+    ],
+    "ask": [
+      "Bash(pnpm add *)",
+      "Bash(pnpm remove *)",
+      "Bash(git push *)",
+      "Bash(docker *)",
+      "Bash(gh pr *)"
+    ],
+    "deny": [
+      "Edit(/.claude/**)",
+      "Edit(/.github/**)",
+      "Edit(/tools/**)",
+      "Edit(/docs/architecture/**)",
+      "Edit(/CLAUDE.md)",
+      "Edit(/tests.lock.json)",
+      "Edit(/tasks/ACTIVE)",
+      "Edit(/eslint.config.mjs)",
+      "Edit(/nx.json)",
+      "Edit(/lefthook.yml)",
+      "Edit(/packages/contracts/contracts.snapshot.json)",
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Bash(pnpm tests:lock *)",
+      "Bash(pnpm task:start *)",
+      "Bash(pnpm task:done *)",
+      "Bash(pnpm contracts:snapshot *)",
+      "Bash(git commit --no-verify *)",
+      "Bash(git commit -n *)",
+      "Bash(git push --force *)",
+      "Bash(git push -f *)",
+      "Bash(git reset --hard *)",
+      "Bash(rm -rf *)",
+      "Bash(npm *)",
+      "Bash(yarn *)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/session-start.mjs\""
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/guard-paths.mjs\""
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/guard-tests.mjs\""
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/guard-bash.mjs\""
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/post-edit.mjs\""
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/stop-verify.mjs\"",
+            "timeout": 600
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/stop-verify.mjs\"",
+            "timeout": 600
+          }
+        ]
+      }
+    ]
+  }
+}

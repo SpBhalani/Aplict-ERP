@@ -1,0 +1,2 @@
+// Application: use cases. Load through ports, apply domain rules, save, publish events.
+export {};

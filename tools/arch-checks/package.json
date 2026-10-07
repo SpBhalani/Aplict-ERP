@@ -1,0 +1,11 @@
+{
+  "name": "@platform/arch-checks",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@platform/contracts": "workspace:*",
+    "@platform/kernel": "workspace:*",
+    "zod": "^4.6.5"
+  }
+}

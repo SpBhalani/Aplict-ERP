@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/schema",
+  "$id": "PlatformCapability",
+  "title": "Create a capability contract",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Business question as area.question, e.g. stock.checkLevel",
+      "$default": { "$source": "argv", "index": 0 }
+    },
+    "version": { "type": "number", "default": 1 },
+    "description": {
+      "type": "string",
+      "default": "TODO: the business question this capability answers"
+    }
+  },
+  "required": ["name"]
+}

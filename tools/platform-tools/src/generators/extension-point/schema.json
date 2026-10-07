@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/schema",
+  "$id": "PlatformExtensionPoint",
+  "title": "Create an extension point",
+  "type": "object",
+  "properties": {
+    "module": { "type": "string", "description": "Module folder name" },
+    "name": {
+      "type": "string",
+      "description": "Short name, camelCase, e.g. beforeApprove or priceRule"
+    },
+    "kind": { "type": "string", "enum": ["hook", "rule"], "default": "hook" }
+  },
+  "required": ["module", "name"]
+}

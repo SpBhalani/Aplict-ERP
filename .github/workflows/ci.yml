@@ -1,0 +1,45 @@
+name: ci
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+  push:
+    branches: [main]
+
+jobs:
+  gates:
+    runs-on: ubuntu-latest
+    env:
+      NX_NO_CLOUD: true
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - uses: nrwl/nx-set-shas@v4
+      - run: pnpm nx affected -t lint typecheck test --parallel=3 --output-style=static
+      - run: pnpm -s arch:check
+      - run: pnpm -s contracts:check
+      - run: pnpm -s tests:verify-lock
+      - run: pnpm -s hooks:test
+      - run: pnpm nx run-many -t contract-test --projects=tag:type:client --output-style=static
+
+  protected-paths:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - name: Protected paths need a label and an ADR
+        env:
+          LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+        run: |
+          changed=$(git diff --name-only "$BASE"...HEAD)
+          hits=$(echo "$changed" | grep -E '^(\.claude/|\.github/|tools/|packages/(kernel|contracts)/|docs/architecture/|CLAUDE\.md$|tests\.lock\.json$|eslint\.config\.mjs$|nx\.json$|lefthook\.yml$)' || true)
+          [ -z "$hits" ] && { echo "No protected paths changed."; exit 0; }
+          echo "Protected paths changed:"; echo "$hits"
+          [[ ",$LABELS," == *",architecture-change,"* ]] || { echo "::error::Add the architecture-change label."; exit 1; }
+          git diff --name-only --diff-filter=A "$BASE"...HEAD | grep -qE '^docs/adr/[0-9]{4}-.+\.md$' \
+            || { echo "::error::Add a new ADR under docs/adr/."; exit 1; }

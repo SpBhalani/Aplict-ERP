@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "scripts": { "dev": "tsx watch src/main.ts" },
+  "scripts": {
+    "dev": "tsx watch src/main.ts"
+  },
   "dependencies": {
     "@nestjs/common": "^12.1.2",
     "@nestjs/core": "^12.1.2",

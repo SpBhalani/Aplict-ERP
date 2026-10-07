@@ -1,0 +1,13 @@
+{
+  "name": "client-<%= name %>",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "clients/<%= name %>/src",
+  "projectType": "library",
+  "tags": ["type:client", "scope:<%= name %>"],
+  "targets": {
+    "lint": { "command": "eslint clients/<%= name %>" },
+    "typecheck": { "command": "tsc -p clients/<%= name %>/tsconfig.json" },
+    "test": { "command": "vitest run --root clients/<%= name %>" },
+    "contract-test": { "command": "vitest run --root clients/<%= name %> adapters" }
+  }
+}

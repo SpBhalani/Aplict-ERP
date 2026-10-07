@@ -1,0 +1,7 @@
+import type { ShellRegistryPort } from '@platform/kernel';
+
+/** Adds this module's routes, menu items and widgets to the web shell (handbook chapter 9). */
+export function register(shell: ShellRegistryPort): void {
+  // shell.addRoute({ path: '/<%= name %>', component: lazy(() => import('./pages/<%= name %>-page')) });
+  void shell;
+}

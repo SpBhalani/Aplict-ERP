@@ -1,0 +1,5 @@
+/**
+ * The ONLY file other packages may import from this module.
+ * Export contract-facing types and extension points here; never internals.
+ */
+export {};

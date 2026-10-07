@@ -1,0 +1,12 @@
+{
+  "name": "arch-checks",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "tools/arch-checks/src",
+  "projectType": "library",
+  "tags": ["type:tool"],
+  "targets": {
+    "lint": { "command": "eslint tools/arch-checks" },
+    "typecheck": { "command": "tsc -p tools/arch-checks/tsconfig.json" },
+    "test": { "command": "vitest run --root tools/arch-checks" }
+  }
+}

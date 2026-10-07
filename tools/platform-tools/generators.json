@@ -1,0 +1,34 @@
+{
+  "generators": {
+    "module": {
+      "factory": "./src/generators/module/generator",
+      "schema": "./src/generators/module/schema.json",
+      "description": "Create a module package with manifest, layers, public API, UI register and tests."
+    },
+    "capability": {
+      "factory": "./src/generators/capability/generator",
+      "schema": "./src/generators/capability/schema.json",
+      "description": "Create a versioned capability contract in packages/contracts."
+    },
+    "event": {
+      "factory": "./src/generators/event/generator",
+      "schema": "./src/generators/event/schema.json",
+      "description": "Create a versioned event contract in packages/contracts."
+    },
+    "adapter": {
+      "factory": "./src/generators/adapter/generator",
+      "schema": "./src/generators/adapter/schema.json",
+      "description": "Create an adapter that provides a capability, with its contract test."
+    },
+    "extension-point": {
+      "factory": "./src/generators/extension-point/generator",
+      "schema": "./src/generators/extension-point/schema.json",
+      "description": "Create a typed hook or replaceable rule in a module."
+    },
+    "client": {
+      "factory": "./src/generators/client/generator",
+      "schema": "./src/generators/client/schema.json",
+      "description": "Create a client package with client.json, config and tests."
+    }
+  }
+}

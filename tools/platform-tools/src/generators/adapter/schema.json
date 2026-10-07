@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/schema",
+  "$id": "PlatformAdapter",
+  "title": "Create a capability adapter",
+  "type": "object",
+  "properties": {
+    "capability": { "type": "string", "description": "Capability name, e.g. stock.checkLevel" },
+    "version": { "type": "number", "default": 1 },
+    "target": { "type": "string", "description": "System it talks to, kebab-case, e.g. erp" },
+    "project": {
+      "type": "string",
+      "description": "Module or client folder name that will hold it"
+    },
+    "kind": { "type": "string", "enum": ["module", "client"], "default": "client" }
+  },
+  "required": ["capability", "target", "project"]
+}

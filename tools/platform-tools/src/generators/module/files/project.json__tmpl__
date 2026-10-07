@@ -1,0 +1,12 @@
+{
+  "name": "module-<%= name %>",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/modules/<%= name %>/src",
+  "projectType": "library",
+  "tags": ["type:module", "scope:<%= name %>"],
+  "targets": {
+    "lint": { "command": "eslint packages/modules/<%= name %>" },
+    "typecheck": { "command": "tsc -p packages/modules/<%= name %>/tsconfig.json" },
+    "test": { "command": "vitest run --root packages/modules/<%= name %>" }
+  }
+}

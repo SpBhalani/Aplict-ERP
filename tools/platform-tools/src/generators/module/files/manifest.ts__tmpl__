@@ -1,0 +1,23 @@
+import { defineModule } from '@platform/kernel';
+
+/**
+ * The module's identity card (handbook chapter 3). The loader and arch:check read it.
+ * Fill it from the approved spec in docs/specs/. Names of permissions, settings,
+ * records, extension points, jobs and published events start with "<%= name %>.".
+ */
+export default defineModule({
+  name: '<%= name %>',
+  version: '0.1.0',
+  kernel: '^0.1.0',
+  description: '<%= description %>',
+  provides: [],
+  requires: [],
+  publishes: [],
+  subscribes: [],
+  ui: { menu: [], widgets: [] },
+  permissions: [],
+  settings: [],
+  records: [],
+  extensionPoints: [],
+  jobs: [],
+});

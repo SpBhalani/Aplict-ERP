@@ -1,0 +1,5 @@
+/**
+ * Client package for <%= name %>: hooks, rules, listeners, adapters and extra modules.
+ * Uses extension points only (handbook chapter 7). Never edits core code.
+ */
+export {};

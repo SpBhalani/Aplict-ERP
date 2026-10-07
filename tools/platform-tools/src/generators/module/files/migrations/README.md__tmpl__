@@ -1,0 +1,1 @@
+Migrations for the `<%= schema %>` schema only. Never edit one that has run; add a new one.

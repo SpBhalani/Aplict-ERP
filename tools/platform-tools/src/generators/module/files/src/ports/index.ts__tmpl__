@@ -1,0 +1,2 @@
+// Ports: interfaces for what this module needs (repositories, capabilities) and offers.
+export {};
