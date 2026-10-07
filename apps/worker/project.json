@@ -1,0 +1,13 @@
+{
+  "name": "worker",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/worker/src",
+  "projectType": "application",
+  "tags": ["type:app"],
+  "targets": {
+    "lint": { "command": "eslint apps/worker" },
+    "typecheck": { "command": "tsc -p apps/worker/tsconfig.json" },
+    "test": { "command": "vitest run --root apps/worker" },
+    "serve": { "command": "tsx apps/worker/src/main.ts" }
+  }
+}

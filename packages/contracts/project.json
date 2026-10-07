@@ -1,0 +1,12 @@
+{
+  "name": "contracts",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/contracts/src",
+  "projectType": "library",
+  "tags": ["type:contracts"],
+  "targets": {
+    "lint": { "command": "eslint packages/contracts" },
+    "typecheck": { "command": "tsc -p packages/contracts/tsconfig.json" },
+    "test": { "command": "vitest run --root packages/contracts" }
+  }
+}

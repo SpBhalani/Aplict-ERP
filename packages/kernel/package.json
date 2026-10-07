@@ -1,0 +1,8 @@
+{
+  "name": "@platform/kernel",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": { ".": "./src/public-api.ts" },
+  "dependencies": { "@platform/contracts": "workspace:*", "zod": "^4.6.5" }
+}

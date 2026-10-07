@@ -1,0 +1,14 @@
+{
+  "name": "web",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/web/src",
+  "projectType": "application",
+  "tags": ["type:app"],
+  "targets": {
+    "lint": { "command": "eslint apps/web" },
+    "typecheck": { "command": "tsc -p apps/web/tsconfig.json" },
+    "test": { "command": "vitest run --root apps/web" },
+    "serve": { "command": "vite apps/web" },
+    "build": { "command": "vite build apps/web" }
+  }
+}

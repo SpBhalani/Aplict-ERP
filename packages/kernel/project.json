@@ -1,0 +1,12 @@
+{
+  "name": "kernel",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/kernel/src",
+  "projectType": "library",
+  "tags": ["type:kernel"],
+  "targets": {
+    "lint": { "command": "eslint packages/kernel" },
+    "typecheck": { "command": "tsc -p packages/kernel/tsconfig.json" },
+    "test": { "command": "vitest run --root packages/kernel" }
+  }
+}
