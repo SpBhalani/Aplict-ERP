@@ -1,12 +1,12 @@
 # Replace @your-github-handle with the architecture owner(s).
-/.claude/                                  @your-github-handle
-/.github/                                  @your-github-handle
-/tools/                                    @your-github-handle
-/packages/kernel/                          @your-github-handle
-/packages/contracts/                       @your-github-handle
-/docs/architecture/                        @your-github-handle
-/CLAUDE.md                                 @your-github-handle
-/tests.lock.json                           @your-github-handle
-/eslint.config.mjs                         @your-github-handle
-/nx.json                                   @your-github-handle
-/lefthook.yml                              @your-github-handle
+/.claude/                                  @spbhalani
+/.github/                                  @spbhalani
+/tools/                                    @spbhalani
+/packages/kernel/                          @spbhalani
+/packages/contracts/                       @spbhalani
+/docs/architecture/                        @spbhalani
+/CLAUDE.md                                 @spbhalani
+/tests.lock.json                           @spbhalani
+/eslint.config.mjs                         @spbhalani
+/nx.json                                   @spbhalani
+/lefthook.yml                              @spbhalani
