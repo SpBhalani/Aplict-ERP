@@ -4,7 +4,7 @@ feature: kernel-foundation
 package: packages/kernel
 scope:
   - packages/kernel/
-status: tests-locked
+status: review
 depends_on: [T-001]
 ---
 
@@ -15,13 +15,13 @@ Drizzle handle and a TransactionHandle the EventBus can write into. (D1, D2)
 
 ## Acceptance
 
-- [ ] `createDatabase(config)` opens a pg pool; `close()` ends it.
-- [ ] `db.transaction(async (tx) => ...)` commits on success and rolls back on any thrown error.
-- [ ] Nested `transaction` calls reuse the outer transaction instead of opening a second one.
-- [ ] The `tx` passed in satisfies the kernel `TransactionHandle` port and exposes the Drizzle handle to adapters.
-- [ ] `db.ping()` returns true when the database answers, false (not throw) when it doesn't, within 2 s.
-- [ ] Only files under src/adapters/db/ import drizzle-orm or pg.
-- [ ] Tests run against real PostgreSQL via Testcontainers.
+- [x] `createDatabase(config)` opens a pg pool; `close()` ends it.
+- [x] `db.transaction(async (tx) => ...)` commits on success and rolls back on any thrown error.
+- [x] Nested `transaction` calls reuse the outer transaction instead of opening a second one.
+- [x] The `tx` passed in satisfies the kernel `TransactionHandle` port and exposes the Drizzle handle to adapters.
+- [x] `db.ping()` returns true when the database answers, false (not throw) when it doesn't, within 2 s.
+- [x] Only files under src/adapters/db/ import drizzle-orm or pg.
+- [x] Tests run against real PostgreSQL via Testcontainers.
 
 ## Change spec
 
@@ -60,8 +60,23 @@ Approved by: Smit, 9-oct-26.
   yet) until T-002 is implemented. Human decided to stop here anyway and
   handle the hook's nagging manually rather than jump to /implement now.
 
+- 2026-10-09: Implemented `createDatabase` in `database.ts`: one `pg.Pool`
+  per instance; `transaction()` uses a `node:async_hooks` `AsyncLocalStorage`
+  scoped per instance so a nested `transaction()` call reuses the outer
+  client/BEGIN instead of opening a second one; `tx.id` comes from the
+  kernel's `newId()` (UUIDv7); `tx.db` is `drizzle(client)` bound to the
+  checked-out client; `ping()` races a query against a ~1.9s manual timeout
+  so it always resolves false instead of throwing/hanging; `close()` calls
+  `pool.end()`. `database.port.ts` needed no changes. `public-api.ts` was
+  deliberately left untouched (not in the approved Change spec; nothing
+  outside the kernel consumes this port yet).
+  `pnpm nx test kernel`: 9/9 files, 64/64 tests green (real PostgreSQL via
+  Testcontainers). `pnpm -s verify:quick`: all green (lint, typecheck, test,
+  arch:check, contracts:check, tests:verify-lock). `/review-arch` verdict:
+  CLEAN, with two non-blocking flags — (1) `DatabasePort`/`createDatabase`
+  not yet re-exported from `public-api.ts`, to close before a module
+  consumes this port; (2) this progress-log update, now done.
+
 ## Next step
 
-human: review tests, then pnpm tests:lock kernel (note: stop-verify hook
-will keep blocking on the failing kernel tests until T-002 is implemented
-— expected, since these tests define what /implement still has to build)
+open PR
