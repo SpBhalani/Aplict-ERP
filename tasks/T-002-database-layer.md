@@ -28,7 +28,7 @@ Drizzle handle and a TransactionHandle the EventBus can write into. (D1, D2)
 New: src/adapters/db/database.ts, src/ports/database.port.ts. Dependencies:
 drizzle-orm, pg, @types/pg; dev: testcontainers, @testcontainers/postgresql.
 Adds an `integration-test` style test file naming (`*.int.test.ts`).
-Approved by: <name>, <date>.
+Approved by: Smit, 9-oct-26.
 
 ## Decisions
 
