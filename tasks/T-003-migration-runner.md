@@ -4,7 +4,7 @@ feature: kernel-foundation
 package: packages/kernel
 scope:
   - packages/kernel/
-status: tests-locked
+status: review
 depends_on: [T-002]
 ---
 
@@ -14,13 +14,13 @@ Apply kernel and module migrations safely, in order, once. (D3)
 
 ## Acceptance
 
-- [ ] `migrate(db, [{ module, schema, dir }])` creates each schema if missing, then applies its `NNNN_*.sql` files in numeric order, each in its own transaction.
-- [ ] Applied files are recorded in `kernel.schema_migrations` with checksum; running again applies nothing.
-- [ ] A changed checksum on an applied file stops with an error naming module and file.
-- [ ] A failing file rolls back only that file, stops, and names the file and SQL error.
-- [ ] Two concurrent `migrate` calls on one database: one waits (advisory lock); each file is applied once.
-- [ ] Kernel's own migrations (schema_migrations, outbox, processed_events) run first.
-- [ ] A module not in the list is never touched, and nothing is ever dropped.
+- [x] `migrate(db, [{ module, schema, dir }])` creates each schema if missing, then applies its `NNNN_*.sql` files in numeric order, each in its own transaction.
+- [x] Applied files are recorded in `kernel.schema_migrations` with checksum; running again applies nothing.
+- [x] A changed checksum on an applied file stops with an error naming module and file.
+- [x] A failing file rolls back only that file, stops, and names the file and SQL error.
+- [x] Two concurrent `migrate` calls on one database: one waits (advisory lock); each file is applied once.
+- [x] Kernel's own migrations (schema_migrations, outbox, processed_events) run first.
+- [x] A module not in the list is never touched, and nothing is ever dropped.
 
 ## Change spec
 
@@ -59,6 +59,30 @@ Approved by: smit, 9-oct-26.
 
   No acceptance point is without a test.
 
+- 2026-10-09: Implemented by the implementer subagent:
+  `packages/kernel/src/adapters/db/migrate.ts` (raw `pg.Client`; advisory
+  lock; `kernel.schema_migrations` bootstrapped in code so it exists before
+  any file lookup; kernel module unconditionally prepended) and
+  `packages/kernel/migrations/0001_kernel.sql` (creates `kernel.outbox` and
+  `kernel.processed_events` per ADR-0002 D4/D5). All 8 locked tests pass; all
+  previously-locked suites unchanged. `pnpm verify:quick` green.
+
+- 2026-10-09: Found and fixed a stale lock entry unrelated to this
+  implementation: `tests.lock.json`'s hash for `migrate.int.test.ts`,
+  recorded in the original lock commit (`39dc36e`), didn't match the file's
+  actual content (file itself was untouched — confirmed via `git diff`).
+  Human re-ran `pnpm tests:lock kernel` (commit `5e6d0fa`), fixing it.
+
+- 2026-10-10: `/review-arch` verdict: CLEAN, no FAILs. Resolved its three
+  open items: (1) added `packages/kernel/src/adapters/db/migrate.test.ts`,
+  a fast no-database unit test for `assertIdentifier`'s rejection path
+  (exported from `migrate.ts` for this purpose only — not part of the public
+  API); (2) exported `migrate`/`MigrationModule` from `public-api.ts` — no
+  current caller, but `apps/api`/`apps/worker` can only reach kernel code
+  through the public API (`package.json` `exports` restricts this), so this
+  was needed before any later task wires it in; (3) this status update.
+  `pnpm verify:quick` re-confirmed green (76 kernel tests, 11 suites).
+
 ## Next step
 
-human: review tests, then pnpm tests:lock kernel
+open PR
