@@ -6,3 +6,6 @@ export * from './ports/event-bus.port';
 export * from './ports/capability-registry.port';
 export * from './ports/ui-registry.port';
 export { InMemoryCapabilityRegistry, type ProviderSelection } from './capability-registry';
+export * from './config';
+export * from './context';
+export * from './ids';

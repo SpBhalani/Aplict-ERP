@@ -1,0 +1,86 @@
+From 078ac42a189489ead502af0466dddcae9ac47d95 Mon Sep 17 00:00:00 2001
+From: Platform setup <setup@platform>
+Date: Fri, 9 Oct 2026 13:01:55 +0000
+Subject: [PATCH] fix(tools): stop git hooks hanging on Nx's analytics prompt
+
+Nx 23 asks an interactive analytics question in a terminal; inside the
+pre-push hook it was hidden and waited forever. Answer it in nx.json,
+make verify:quick non-interactive, and stream pre-push output live.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01X9TdZzBktSrCSxnpnvCT9p
+---
+ lefthook.yml                    |  1 +
+ nx.json                         | 20 ++++++++++++++++----
+ tools/arch-checks/src/verify.ts |  4 ++++
+ 3 files changed, 21 insertions(+), 4 deletions(-)
+
+diff --git a/lefthook.yml b/lefthook.yml
+index a1d6763..579fe18 100644
+--- a/lefthook.yml
++++ b/lefthook.yml
+@@ -13,6 +13,7 @@ commit-msg:
+     commitlint:
+       run: pnpm exec commitlint --edit {1}
+ pre-push:
++  follow: true # stream output live, so a long check never looks frozen
+   commands:
+     verify:
+       run: pnpm -s verify:quick
+diff --git a/nx.json b/nx.json
+index 73d9c6a..7c1474e 100644
+--- a/nx.json
++++ b/nx.json
+@@ -1,15 +1,27 @@
+ {
+   "$schema": "./node_modules/nx/schemas/nx-schema.json",
++  "analytics": false,
+   "defaultBase": "main",
+   "namedInputs": {
+     "default": ["{projectRoot}/**/*"],
+     "production": ["default", "!{projectRoot}/**/*.test.ts", "!{projectRoot}/**/*.spec.ts"]
+   },
+   "targetDefaults": {
+-    "lint": { "cache": true, "inputs": ["default", "{workspaceRoot}/eslint.config.mjs"] },
+-    "typecheck": { "cache": true, "dependsOn": ["^typecheck"] },
+-    "test": { "cache": true },
+-    "build": { "cache": true, "dependsOn": ["^build"] }
++    "lint": {
++      "cache": true,
++      "inputs": ["default", "{workspaceRoot}/eslint.config.mjs"]
++    },
++    "typecheck": {
++      "cache": true,
++      "dependsOn": ["^typecheck"]
++    },
++    "test": {
++      "cache": true
++    },
++    "build": {
++      "cache": true,
++      "dependsOn": ["^build"]
++    }
+   },
+   "plugins": []
+ }
+diff --git a/tools/arch-checks/src/verify.ts b/tools/arch-checks/src/verify.ts
+index e43cef2..1e6fc12 100644
+--- a/tools/arch-checks/src/verify.ts
++++ b/tools/arch-checks/src/verify.ts
+@@ -35,10 +35,14 @@ const steps: [string, string[]][] = [
+   ['pnpm', ['-s', 'tests:verify-lock']],
+ ];
+ 
++// Never wait for interactive input: this runs inside git hooks and Claude Code hooks.
++const env = { ...process.env, NX_TUI: 'false', NX_NO_CLOUD: 'true', NX_INTERACTIVE: 'false' };
++
+ for (const [cmd, args] of steps) {
+   const r = spawnSync(cmd, args, {
+     cwd: ROOT,
+     stdio: 'inherit',
++    env,
+     shell: process.platform === 'win32',
+   });
+   if (r.status !== 0) {
+-- 
+2.43.0

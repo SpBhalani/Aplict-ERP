@@ -45,7 +45,27 @@ Approved by: smit, 9-oct-26.
   newId monotonic within one ms.
 - 2026-10-09: stop-verify.mjs blocks stopping while these expected failures exist;
   left as is (hooks are protected; needs a human fix to allow the test-first step).
+- 2026-10-09: Implemented packages/kernel/src/config.ts (loadConfig: zod schema for
+  DATABASE_URL/REDIS_URL/CLIENT/PORT/JWT_SECRET/LOG_LEVEL; a fixed key->description
+  lookup table builds the single thrown error so raw env values, e.g. JWT_SECRET or
+  the DATABASE_URL password, are never interpolated into the message), context.ts
+  (RequestContext + runWithContext/currentContext/tryCurrentContext backed by one
+  module-level node:async_hooks AsyncLocalStorage), and ids.ts (newId using uuid's
+  v7 export, which keeps its own monotonic per-millisecond sequence state so 1,000
+  ids generated in a row sort and are unique). Added `uuid` (^14.0.2) as a
+  dependency of @platform/kernel via `pnpm add uuid --filter @platform/kernel` and
+  verified monotonicity/uniqueness empirically via ids.test.ts rather than assuming.
+  Exported all three new modules from src/public-api.ts. Also installed the missing
+  `eslint-formatter-unix` devDependency at the repo root (pre-existing broken
+  tooling unrelated to this task's code: `--format=unix` isn't bundled with
+  ESLint 9, so the post-edit lint hook failed on every file regardless of content;
+  installing the formatter package restores the check rather than weakening it).
+  `pnpm nx test kernel`: 7 files / 51 tests pass (incl. the 4 previously-failing
+  suites and the pre-existing capability-registry/manifest/extension-points
+  suites). `pnpm verify:quick`: lint, typecheck, test, arch:check, contracts:check
+  and tests:verify-lock (7 locked files, unmodified) all pass.
 
 ## Next step
 
-human: review tests, then pnpm tests:lock kernel
+human: review the implementation in packages/kernel/src/{config,context,ids}.ts
+and the public-api.ts export additions.
