@@ -35,10 +35,14 @@ const steps: [string, string[]][] = [
   ['pnpm', ['-s', 'tests:verify-lock']],
 ];
 
+// Never wait for interactive input: this runs inside git hooks and Claude Code hooks.
+const env = { ...process.env, NX_TUI: 'false', NX_NO_CLOUD: 'true', NX_INTERACTIVE: 'false' };
+
 for (const [cmd, args] of steps) {
   const r = spawnSync(cmd, args, {
     cwd: ROOT,
     stdio: 'inherit',
+    env,
     shell: process.platform === 'win32',
   });
   if (r.status !== 0) {

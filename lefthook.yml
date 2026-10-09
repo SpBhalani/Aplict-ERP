@@ -13,6 +13,7 @@ commit-msg:
     commitlint:
       run: pnpm exec commitlint --edit {1}
 pre-push:
+  follow: true # stream output live, so a long check never looks frozen
   commands:
     verify:
       run: pnpm -s verify:quick
