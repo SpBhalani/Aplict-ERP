@@ -1,6 +1,6 @@
 {
   "files": {
-    "packages/kernel/src/adapters/db/database.int.test.ts": "afd0925878dae8ae58de792e803e2ca611c8b640d303b29a0631beff3bf342d7",
+    "packages/kernel/src/adapters/db/database.int.test.ts": "2e279c2c235b9625de3ef3acb53c07996d89ff6625d7f1b30ae40bb680045528",
     "packages/kernel/src/adapters/db/database.test.ts": "2a9aed0d27e6d5cb60495c2d7a9df6c686753031ed6dcb318d3484a0841b6150",
     "packages/kernel/src/capability-registry.test.ts": "67a7c9e0ee19f509e24d8d5d4df2c643638c6ad99d6cf7322022b42210a73ae8",
     "packages/kernel/src/config.test.ts": "6dd356559cc028fc33d03545ee64a50218cede34eef5dda2ceb7c5d73e0fc120",

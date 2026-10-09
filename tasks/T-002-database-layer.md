@@ -4,7 +4,7 @@ feature: kernel-foundation
 package: packages/kernel
 scope:
   - packages/kernel/
-status: planned
+status: tests-locked
 depends_on: [T-001]
 ---
 
