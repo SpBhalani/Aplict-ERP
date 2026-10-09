@@ -4,7 +4,7 @@ feature: kernel-foundation
 package: packages/kernel
 scope:
   - packages/kernel/
-status: review
+status: done
 depends_on: [T-001]
 ---
 

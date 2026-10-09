@@ -25,7 +25,7 @@ Apply kernel and module migrations safely, in order, once. (D3)
 ## Change spec
 
 New: src/adapters/db/migrate.ts, packages/kernel/migrations/0001_kernel.sql.
-Approved by: <name>, <date>.
+Approved by: smit, 9-oct-26.
 
 ## Decisions
 
