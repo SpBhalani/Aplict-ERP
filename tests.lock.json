@@ -1,1 +1,11 @@
-{ "files": {} }
+{
+  "files": {
+    "packages/kernel/src/capability-registry.test.ts": "67a7c9e0ee19f509e24d8d5d4df2c643638c6ad99d6cf7322022b42210a73ae8",
+    "packages/kernel/src/config.test.ts": "6dd356559cc028fc33d03545ee64a50218cede34eef5dda2ceb7c5d73e0fc120",
+    "packages/kernel/src/context.test.ts": "44372c3e26da1b90c2d1369820738e6f2e1fb43b0336d0aa867f441905da49cb",
+    "packages/kernel/src/extension-points.test.ts": "30961d891122159ab480751bdb1f2ef3cdcc329124386761b9ace78b6b97f0f3",
+    "packages/kernel/src/ids.test.ts": "e0670642396ebca2c550d1c60f5b7f7cf14ce0a65034234e459f5364c9f28d49",
+    "packages/kernel/src/manifest.test.ts": "789646b2cf8fc1a254d430cb4e095ce9451d352e9936d68a114be707be2300ce",
+    "packages/kernel/src/public-api.test.ts": "51d309d949ff9a79d6962dd41921de74be07e4ae4f304a39f5a42726e51c80fb"
+  }
+}

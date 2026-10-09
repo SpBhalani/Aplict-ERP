@@ -1,0 +1,260 @@
+From 4259df172950e141d8bca2244d9b875165173380 Mon Sep 17 00:00:00 2001
+From: Platform setup <setup@platform>
+Date: Fri, 9 Oct 2026 11:32:48 +0000
+Subject: [PATCH] feat(tools): allow kernel tasks via task:start --protected in
+ any Claude Code UI
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01X9TdZzBktSrCSxnpnvCT9p
+---
+ .claude/hooks/lib.mjs                | 15 ++++++++++++--
+ .claude/hooks/session-start.mjs      |  4 +++-
+ .claude/hooks/test-hooks.mjs         | 30 ++++++++++++++++++++++++++-
+ CLAUDE.md                            | 25 +++++++++++++---------
+ README.md                            | 20 +++++++++---------
+ docs/specs/kernel-foundation/plan.md |  4 ++--
+ tools/arch-checks/src/task.ts        | 31 +++++++++++++++++++++-------
+ 7 files changed, 95 insertions(+), 34 deletions(-)
+
+diff --git a/.claude/hooks/lib.mjs b/.claude/hooks/lib.mjs
+index bda3172..2b2c060 100644
+--- a/.claude/hooks/lib.mjs
++++ b/.claude/hooks/lib.mjs
+@@ -30,10 +30,21 @@ export function readActive() {
+   const lines = readFileSync(file, 'utf8').split(/\r?\n/);
+   const get = (k) =>
+     lines.filter((l) => l.startsWith(`${k}: `)).map((l) => l.slice(k.length + 2).trim());
+-  return { task: get('task')[0], file: get('file')[0], scope: get('scope') };
++  return {
++    task: get('task')[0],
++    file: get('file')[0],
++    scope: get('scope'),
++    protected: get('protected')[0] === 'true',
++  };
+ }
+ 
+-export const overrideOn = () => process.env.PLATFORM_ALLOW_PROTECTED === '1';
++/**
++ * Kernel/contracts edits are allowed only when a human started the task with
++ * `pnpm task:start <id> --protected` (works in every Claude Code UI), or launched
++ * Claude from a terminal with PLATFORM_ALLOW_PROTECTED=1.
++ */
++export const overrideOn = () =>
++  process.env.PLATFORM_ALLOW_PROTECTED === '1' || readActive()?.protected === true;
+ 
+ /** Files and folders only humans change (rules and gates). */
+ export const RULE_PATHS =
+diff --git a/.claude/hooks/session-start.mjs b/.claude/hooks/session-start.mjs
+index 34529f3..2e07d4a 100644
+--- a/.claude/hooks/session-start.mjs
++++ b/.claude/hooks/session-start.mjs
+@@ -10,7 +10,9 @@ if (!active) {
+   );
+   process.exit(0);
+ }
+-console.log(`Active task: ${active.task} | scope: ${active.scope.join(' ')}`);
++console.log(
++  `Active task: ${active.task} | scope: ${active.scope.join(' ')}${active.protected ? ' | kernel/contracts edits allowed' : ''}`,
++);
+ const file = active.file && resolve(ROOT, active.file);
+ if (file && existsSync(file)) {
+   const text = readFileSync(file, 'utf8');
+diff --git a/.claude/hooks/test-hooks.mjs b/.claude/hooks/test-hooks.mjs
+index 8a1f63f..b1a0f34 100644
+--- a/.claude/hooks/test-hooks.mjs
++++ b/.claude/hooks/test-hooks.mjs
+@@ -22,6 +22,8 @@ writeFileSync(
+   JSON.stringify({ files: { 'packages/modules/quotes/src/a.test.ts': 'x' } }),
+ );
+ 
++const ACTIVE = 'task: T-1\nfile: tasks/T-1-x.md\nscope: packages/modules/quotes/\n';
++const setActive = (extra = '') => writeFileSync(join(root, 'tasks/ACTIVE'), ACTIVE + extra);
+ const run = (hook, input, env = {}) =>
+   spawnSync(process.execPath, [join(HOOKS, hook)], {
+     input: JSON.stringify(input),
+@@ -84,7 +86,32 @@ const cases = [
+ ];
+ 
+ let failed = 0;
+-for (const [name, hook, input, expected] of cases) {
++// The --protected flag in tasks/ACTIVE unlocks kernel/contracts (any Claude Code UI).
++setActive('scope: packages/kernel/\nprotected: true\n');
++cases.push([
++  'guard-paths: kernel with --protected task',
++  'guard-paths.mjs',
++  edit('packages/kernel/src/x.ts'),
++  0,
++  true,
++]);
++cases.push([
++  'guard-paths: rules stay blocked with --protected',
++  'guard-paths.mjs',
++  edit('CLAUDE.md'),
++  2,
++  true,
++]);
++cases.push([
++  'guard-bash: kernel write with --protected',
++  'guard-bash.mjs',
++  bash('echo x > packages/kernel/src/a.ts'),
++  0,
++  true,
++]);
++setActive();
++for (const [name, hook, input, expected, prot] of cases) {
++  setActive(prot ? 'scope: packages/kernel/\nprotected: true\n' : '');
+   const r = run(hook, input);
+   const ok = r.status === expected;
+   if (!ok) failed++;
+@@ -92,6 +119,7 @@ for (const [name, hook, input, expected] of cases) {
+     `${ok ? 'PASS' : 'FAIL'}  ${name}  (exit ${r.status}, expected ${expected})${ok ? '' : `\n      ${(r.stderr || r.stdout).trim()}`}`,
+   );
+ }
++setActive();
+ const s = run('session-start.mjs', {});
+ if (!/Active task: T-1/.test(s.stdout) || !/Next: Write tests\./.test(s.stdout)) {
+   failed++;
+diff --git a/CLAUDE.md b/CLAUDE.md
+index 819aa7c..2460e37 100644
+--- a/CLAUDE.md
++++ b/CLAUDE.md
+@@ -21,8 +21,9 @@ React + Vite + Mantine. Nx + pnpm monorepo.
+ 5. Every module has a valid manifest.ts. Every required capability has a fallback.
+ 6. Contracts are versioned. Never change a published version; generate a new one.
+ 7. Client code lives only in clients/<name>/ and uses extension points only.
+-8. Never edit locked tests (tests.lock.json), rules, gates, kernel or contracts.
+-   If a task seems to need it, stop and tell the human.
++8. Never edit locked tests (tests.lock.json), rules or gates. Edit kernel or
++   contracts only when the active task shows "kernel/contracts edits allowed".
++   If a task seems to need more, stop and tell the human.
+ 9. Create modules, capabilities, events, adapters, extension points and clients
+    only with generators: pnpm nx g @platform/tools:<kind>.
+ 10. Money exact (numeric or minor units), quantities with units, timestamptz,
+@@ -39,14 +40,18 @@ React + Vite + Mantine. Nx + pnpm monorepo.
+ 
+ ## Commands
+ 
+-- pnpm verify:quick lint, typecheck, tests, arch checks on changes
+-- pnpm nx test <project> one project's tests (e.g. module-quotes)
+-- pnpm nx g @platform/tools:module --name=<x>
+-  (also: capability, event, adapter, extension-point, client)
+-- docs/module-map.md every module, capability and event: read this
+-  instead of exploring other modules
++```text
++pnpm verify:quick              lint, typecheck, tests, arch checks on changes
++pnpm nx test <project>         one project's tests (e.g. module-quotes)
++pnpm nx g @platform/tools:module --name=<x>
++                               also: capability, event, adapter, extension-point, client
++docs/module-map.md             every module, capability and event: read this
++                               instead of exploring other modules
++```
+ 
+ ## Where things are
+ 
+-apps/{api,worker,web} packages/{kernel,contracts,modules/_} clients/_
+-tools/{platform-tools,arch-checks} docs/{architecture,adr,specs} tasks/
++```text
++apps/{api,worker,web}   packages/{kernel,contracts,modules/*}   clients/*
++tools/{platform-tools,arch-checks}   docs/{architecture,adr,specs}   tasks/
++```
+diff --git a/README.md b/README.md
+index 2c3a668..7296fa7 100644
+--- a/README.md
++++ b/README.md
+@@ -59,16 +59,16 @@ Commit those changes yourself (they touch protected paths, so the PR needs the
+ 
+ ## Daily commands
+ 
+-| Command                                          | What it does                                                                     | Who             |
+-| ------------------------------------------------ | -------------------------------------------------------------------------------- | --------------- |
+-| `pnpm -s verify:quick`                           | Lint, typecheck, test what changed, plus every architecture check                | anyone, Claude  |
+-| `pnpm nx g @platform/tools:module --name=quotes` | New module (also: `capability`, `event`, `adapter`, `extension-point`, `client`) | anyone, Claude  |
+-| `pnpm module-map`                                | Regenerate `docs/module-map.md`                                                  | anyone, Claude  |
+-| `pnpm task:start T-001` / `pnpm task:done`       | Set or clear the active task and its scope                                       | **humans only** |
+-| `pnpm tests:lock <project>`                      | Lock approved tests                                                              | **humans only** |
+-| `pnpm contracts:snapshot`                        | Freeze new contract versions                                                     | **humans only** |
+-| `PLATFORM_ALLOW_PROTECTED=1 claude`              | Start Claude for a kernel or contract task                                       | **humans only** |
+-| `pnpm -s hooks:test`                             | Re-test every Claude Code hook                                                   | anyone          |
++| Command                                          | What it does                                                                            | Who             |
++| ------------------------------------------------ | --------------------------------------------------------------------------------------- | --------------- |
++| `pnpm -s verify:quick`                           | Lint, typecheck, test what changed, plus every architecture check                       | anyone, Claude  |
++| `pnpm nx g @platform/tools:module --name=quotes` | New module (also: `capability`, `event`, `adapter`, `extension-point`, `client`)        | anyone, Claude  |
++| `pnpm module-map`                                | Regenerate `docs/module-map.md`                                                         | anyone, Claude  |
++| `pnpm task:start T-001` / `pnpm task:done`       | Set or clear the active task and its scope                                              | **humans only** |
++| `pnpm tests:lock <project>`                      | Lock approved tests                                                                     | **humans only** |
++| `pnpm contracts:snapshot`                        | Freeze new contract versions                                                            | **humans only** |
++| `pnpm task:start T-001 --protected`              | Same, and allow kernel/contracts edits for this task only (works in any Claude Code UI) | **humans only** |
++| `pnpm -s hooks:test`                             | Re-test every Claude Code hook                                                          | anyone          |
+ 
+ ## Starting the first piece of work
+ 
+diff --git a/docs/specs/kernel-foundation/plan.md b/docs/specs/kernel-foundation/plan.md
+index d78f403..f4e1a4a 100644
+--- a/docs/specs/kernel-foundation/plan.md
++++ b/docs/specs/kernel-foundation/plan.md
+@@ -28,8 +28,8 @@ they are deleted or kept as reference once the first real module exists.
+ 
+ ## How each kind of task runs
+ 
+-- **kernel / contract:** human starts `PLATFORM_ALLOW_PROTECTED=1 claude` after
+-  `pnpm task:start <id>`; PR needs the `architecture-change` label. ADR-0002
++- **kernel / contract:** human runs `pnpm task:start <id> --protected`, then opens
++  Claude Code (terminal, desktop app or VS Code); PR needs the `architecture-change` label. ADR-0002
+   covers all kernel tasks in this plan, so no new ADR per task.
+ - **gates (owner):** the owner edits `tools/` (Claude may help in a session
+   started with `claude --setting-sources user`); PR label and ADR-0002.
+diff --git a/tools/arch-checks/src/task.ts b/tools/arch-checks/src/task.ts
+index 1b3812c..5d5654c 100644
+--- a/tools/arch-checks/src/task.ts
++++ b/tools/arch-checks/src/task.ts
+@@ -5,11 +5,13 @@ import { read, ROOT } from './lib/workspace';
+ 
+ const TASKS = join(ROOT, 'tasks');
+ const ACTIVE = join(TASKS, 'ACTIVE');
+-const [mode, id] = process.argv.slice(2);
++const args = process.argv.slice(2);
++const [mode, id] = args.filter((a) => !a.startsWith('--'));
++const wantsProtected = args.includes('--protected');
+ 
+ if (mode === 'start') {
+   if (!id) {
+-    console.error('usage: pnpm task:start <task-id>   (humans only)');
++    console.error('usage: pnpm task:start <task-id> [--protected]   (humans only)');
+     process.exit(1);
+   }
+   const file = readdirSync(TASKS).find((f) => f.startsWith(`${id}-`) || f === `${id}.md`);
+@@ -27,13 +29,26 @@ if (mode === 'start') {
+     console.error(`tasks/${file} is already done`);
+     process.exit(1);
+   }
+-  const lines = [
+-    `task: ${id}`,
+-    `file: tasks/${file}`,
+-    ...scope.map((s) => `scope: ${s.endsWith('/') ? s : `${s}/`}`),
+-  ];
++  const scopes = scope.map((s) => (s.endsWith('/') ? s : `${s}/`));
++  const touchesCore = scopes.some((s) => /^packages\/(kernel|contracts)\//.test(s));
++  if (wantsProtected && !touchesCore) {
++    console.error(
++      '--protected is only for tasks whose scope includes packages/kernel/ or packages/contracts/',
++    );
++    process.exit(1);
++  }
++  const lines = [`task: ${id}`, `file: tasks/${file}`, ...scopes.map((s) => `scope: ${s}`)];
++  if (wantsProtected) lines.push('protected: true');
+   writeFileSync(ACTIVE, `${lines.join('\n')}\n`);
+-  console.info(`active task: ${id}\n${lines.slice(2).join('\n')}\nNow start Claude Code: claude`);
++  console.info(`active task: ${id}\n${scopes.map((s) => `scope: ${s}`).join('\n')}`);
++  if (wantsProtected) {
++    console.warn('PROTECTED: kernel/contracts edits are allowed until you run pnpm task:done');
++  } else if (touchesCore) {
++    console.warn(
++      'Note: this task touches kernel/contracts. Re-run with --protected to allow those edits.',
++    );
++  }
++  console.info('Now start Claude Code.');
+ } else if (mode === 'done') {
+   if (existsSync(ACTIVE)) rmSync(ACTIVE);
+   console.info('active task cleared. Set its status to done in the task file.');
+-- 
+2.43.0
