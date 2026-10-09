@@ -35,11 +35,14 @@ jobs:
         env:
           LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
           BASE: ${{ github.event.pull_request.base.sha }}
+          BODY: ${{ github.event.pull_request.body }}
         run: |
           changed=$(git diff --name-only "$BASE"...HEAD)
           hits=$(echo "$changed" | grep -E '^(\.claude/|\.github/|tools/|packages/(kernel|contracts)/|docs/architecture/|CLAUDE\.md$|tests\.lock\.json$|eslint\.config\.mjs$|nx\.json$|lefthook\.yml$)' || true)
           [ -z "$hits" ] && { echo "No protected paths changed."; exit 0; }
           echo "Protected paths changed:"; echo "$hits"
           [[ ",$LABELS," == *",architecture-change,"* ]] || { echo "::error::Add the architecture-change label."; exit 1; }
-          git diff --name-only --diff-filter=A "$BASE"...HEAD | grep -qE '^docs/adr/[0-9]{4}-.+\.md$' \
-            || { echo "::error::Add a new ADR under docs/adr/."; exit 1; }
+          git diff --name-only --diff-filter=A "$BASE"...HEAD | grep -qE '^docs/adr/[0-9]{4}-.+\.md$' && exit 0
+          ref=$(echo "$BODY" | grep -oE 'ADR-[0-9]{4}' | head -1 | cut -d- -f2)
+          [ -n "$ref" ] && ls docs/adr/"$ref"-*.md >/dev/null 2>&1 && { echo "Covered by ADR-$ref"; exit 0; }
+          echo "::error::Add a new ADR under docs/adr/, or write 'ADR-NNNN' (an existing ADR) in the PR description."; exit 1
