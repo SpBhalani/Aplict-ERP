@@ -9,3 +9,4 @@ export { InMemoryCapabilityRegistry, type ProviderSelection } from './capability
 export * from './config';
 export * from './context';
 export * from './ids';
+export { migrate, type MigrationModule } from './adapters/db/migrate';

@@ -2,6 +2,7 @@
   "files": {
     "packages/kernel/src/adapters/db/database.int.test.ts": "2e279c2c235b9625de3ef3acb53c07996d89ff6625d7f1b30ae40bb680045528",
     "packages/kernel/src/adapters/db/database.test.ts": "2a9aed0d27e6d5cb60495c2d7a9df6c686753031ed6dcb318d3484a0841b6150",
+    "packages/kernel/src/adapters/db/migrate.int.test.ts": "6437bd75dc2bec05269b4d1134d0ba1deaefcfb86624c8e9637473ad73889a29",
     "packages/kernel/src/capability-registry.test.ts": "67a7c9e0ee19f509e24d8d5d4df2c643638c6ad99d6cf7322022b42210a73ae8",
     "packages/kernel/src/config.test.ts": "6dd356559cc028fc33d03545ee64a50218cede34eef5dda2ceb7c5d73e0fc120",
     "packages/kernel/src/context.test.ts": "44372c3e26da1b90c2d1369820738e6f2e1fb43b0336d0aa867f441905da49cb",
